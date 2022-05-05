@@ -51,3 +51,5 @@ I picked `sockperf` because it was a single tool with a nice interface that coul
 
 I did not test probing with many machines, so I don't know how long it takes. If it's too long, we can easily decrease the probing time. If you look at `do-latency.sh` and `do-bandwidth.sh`, the argument passed to `sockperf` is `--time 3`. This basically says "run the probe for 3 seconds." If this ends up being too long, we can reduce it.
 
+Currently, we assume that the latency from a machine to itself is 0.0, and that the bandwidth is infinite. Is this true? Will this mess up our MCMF?
+

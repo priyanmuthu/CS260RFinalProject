@@ -13,7 +13,7 @@ def parse(file_name, entry_name):
             dst_ip = row['dst_ip']
             # The matrix is symmetric
             matrix[(src_ip, dst_ip)] = matrix[(dst_ip, src_ip)] = \
-                    float(row[entry_name])
+                float(row[entry_name])
             # Latency from a node to itself is 0, bandwidth is infinite
             matrix[(src_ip, src_ip)] = matrix[(dst_ip, dst_ip)] = \
                 float("inf") if entry_name == "bandwidth" else 0.0
