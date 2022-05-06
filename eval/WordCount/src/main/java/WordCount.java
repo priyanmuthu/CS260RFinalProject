@@ -1,5 +1,3 @@
-package com.cs260r.eval.wordcount;
-
 import java.io.IOException;
 import java.util.StringTokenizer;
 
@@ -51,6 +49,9 @@ public class WordCount {
     public static void main(String[] args) throws Exception {
         Configuration conf = new Configuration();
         String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
+        for (int i = 0; i < otherArgs.length; ++i) {
+            System.out.println("args[" + i + "] = " + otherArgs[i]);
+        }
         if (otherArgs.length < 2) {
             System.err.println("Usage: wordcount <in> [<in>...] <out>");
             System.exit(2);
