@@ -39,6 +39,11 @@ def buildGraph(latencies, tasks, nodes):
             G.add_edge(name, "n" + str(i), capacity = compute, weight = cost)
     return G
 
+def mcmf(G):
+    minCostFlow = nx.max_flow_min_cost(G, "s", "t")
+    return minCostFlow, nx.cost_of_flow(G, minCostFlow)
+
+
 
 
 # def test_graph_build(num_nodes, num_tasks, )
@@ -47,21 +52,6 @@ latencies = [[0, 1, 2], [1, 0, 1], [2, 1, 0]]
 tasks = {0: (1, [1, 2]), 1: (2, [1]), 2: (1, [0, 2])}
 nodes = {0: 2, 1: 2, 2: 1}
 G = buildGraph(latencies, tasks, nodes)
-print(G.edges.data())
+print(mcmf(G))
 
 # Expected Output
-# [('s', 't0', {'capacity': 1, 'weight': 0}), 
-# ('s', 't1', {'capacity': 2, 'weight': 0}), 
-# ('s', 't2', {'capacity': 1, 'weight': 0}), 
-# ('n0', 't', {'capacity': 2, 'weight': 0}), 
-# ('n1', 't', {'capacity': 2, 'weight': 0}), 
-# ('n2', 't', {'capacity': 1, 'weight': 0}), 
-# ('t0', 'n0', {'capacity': 1, 'weight': 3}), 
-# ('t0', 'n1', {'capacity': 1, 'weight': 1}), 
-# ('t0', 'n2', {'capacity': 1, 'weight': 1}), 
-# ('t1', 'n0', {'capacity': 2, 'weight': 1}), 
-# ('t1', 'n1', {'capacity': 2, 'weight': 0}), 
-# ('t1', 'n2', {'capacity': 2, 'weight': 1}), 
-# ('t2', 'n0', {'capacity': 1, 'weight': 2}), 
-# ('t2', 'n1', {'capacity': 1, 'weight': 2}), 
-# ('t2', 'n2', {'capacity': 1, 'weight': 2})]
