@@ -11,7 +11,6 @@ def buildGraph(bandwidths, latencies, tasks, nodes):
     # add source node 's' and sink node 't'
     G.add_nodes_from([("s", {"type": "source"}), \
                       ("t", {"type": "sink"}),])
-
     # add physical nodes
     node_list = []
     for node in nodes:
