@@ -1,4 +1,5 @@
 from simulator.nodes import LogicalNode, PhysicalNode, LogicalNodeState, LogicalNodeType, Cluster
+from simulator.simulator.mcmf import buildGraph
 
 class MRFlowScheduler:
 
@@ -46,9 +47,9 @@ class MRFlowScheduler:
         schedulable_nodes = list(filter(lambda x: (x.type == LogicalNodeType.MAP or x.type == LogicalNodeType.REDUCE or x.type == LogicalNodeType.OTHER) and x.schedulable(), logical_nodes))
 
         # Run MCMF
-        
 
-        
+        buildGraph(cluster, schedulable_nodes, remaining_physical_nodes)
+
 
         if len(remaining_physical_nodes) == 0:
             return scheduled_pairs
