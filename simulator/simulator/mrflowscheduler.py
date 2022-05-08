@@ -1,5 +1,5 @@
 from simulator.nodes import LogicalNode, PhysicalNode, LogicalNodeState, LogicalNodeType, Cluster
-from simulator.simulator.mcmf import buildGraph
+from simulator.mcmf import buildGraph
 
 class MRFlowScheduler:
 
@@ -7,7 +7,7 @@ class MRFlowScheduler:
     MAX_REDUCE_NODES = 100000
 
     @staticmethod
-    def schedule(logical_nodes: list[LogicalNode], physical_nodes: list[PhysicalNode], completed_nodes: list[LogicalNode] = [], failed_nodes: list[LogicalNode] = [], Cluster = None):
+    def schedule(logical_nodes: list[LogicalNode], physical_nodes: list[PhysicalNode], completed_nodes: list[LogicalNode] = [], failed_nodes: list[LogicalNode] = [], cluster = None):
         '''
             Function to schedule the logical nodes to physical nodes
             logical_nodes: list of logical nodes to schedule
@@ -48,7 +48,8 @@ class MRFlowScheduler:
 
         # Run MCMF
 
-        buildGraph(cluster, schedulable_nodes, remaining_physical_nodes)
+        assignment = buildGraph(cluster, schedulable_nodes, remaining_physical_nodes)
+        print(len(assignment))
 
 
         if len(remaining_physical_nodes) == 0:

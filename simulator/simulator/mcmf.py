@@ -41,30 +41,3 @@ def buildGraph(cluster, lnodes, pnodes):
                 break
 
     return assignment
-
-
-#             # cost = 0
-#             # if pnode in lnode.in_neighbors: 
-#             #     cost = 
-#             # else: 
-#             #     cost = 
-            
-
-# def mcmf(G, tasks):
-#     minCostFlow = nx.max_flow_min_cost(G, "s", "t")
-
-#     assignment = {}
-#     assignment_ids = {}
-#     for name in task_names:
-#         flow_edges = minCostFlow[name]
-#         assigned = False
-#         for key in flow_edges:
-#             if flow_edges[key] > 0:
-#                 assignment[name] = key
-#                 assignment_ids[int(name[1])] = int(key[1])
-#                 assigned = True
-#         if assigned is False:
-#             print("NODE ", name, " not assigned physical node")
-
-#     # choose 1 to return based of simulator arch
-#     return (assignment, assignment_ids)

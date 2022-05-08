@@ -20,7 +20,7 @@ def simulate(lnodes, pnodes, scheduler_class, cluster=Cluster.default_cluster(),
     while True:
         if verbose:
             print('Current time: {}'.format(timer.now()))
-        node_assignments = scheduler_class.schedule(lnodes, pnodes, completed_lnodes, failed_lnodes)
+        node_assignments = scheduler_class.schedule(lnodes, pnodes, completed_lnodes, failed_lnodes, cluster)
         
         completed_lnodes.clear()
         failed_lnodes.clear()
