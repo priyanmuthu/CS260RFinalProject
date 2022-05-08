@@ -3,6 +3,7 @@ from tests.finalhelpfunctions import FinalHelperFunctions
 from simulator.nodes import Config, straggler_time, Cluster
 from simulator.simulator import simulate
 from simulator.mrscheduler import MRScheduler
+from simulator.mrflowscheduler import MRFlowScheduler
 from collections import defaultdict
 import random
 from simulator.mcmf import buildGraph, mcmf
@@ -108,7 +109,7 @@ class TestFinalBenchmarks(unittest.TestCase):
 
         cluster = Cluster(physical_nodes, bandwidth, latency)
 
-        total_time = simulate(logical_nodes, physical_nodes, MRScheduler, cluster, True)
+        total_time = simulate(logical_nodes, physical_nodes, MRFlowScheduler, cluster, True)
 
         print("Total time: ",total_time)
 

@@ -32,8 +32,8 @@ class MRFlowScheduler:
         # Scheduling shuffle node
         shuffle_nodes = filter(lambda x: x.type == LogicalNodeType.SHUFFLE and x.schedulable(), logical_nodes)
         for shuffle_node in shuffle_nodes:
-            if shuffle_node.schedulable() and len(remaining_physical_nodes) > 0 and s_running_nodes < MRScheduler.MAX_SHUFFLE_NODES:
-                best_physical_node = MRScheduler.find_best_physical_node(shuffle_node, remaining_physical_nodes)
+            if shuffle_node.schedulable() and len(remaining_physical_nodes) > 0 and s_running_nodes < MRFlowScheduler.MAX_SHUFFLE_NODES:
+                best_physical_node = MRFlowScheduler.find_best_physical_node(shuffle_node, remaining_physical_nodes)
                 if best_physical_node is not None:
                     scheduled_pairs.append((shuffle_node, best_physical_node))
                     remaining_physical_nodes.remove(best_physical_node)
@@ -46,7 +46,7 @@ class MRFlowScheduler:
         map_nodes = list(filter(lambda x: x.type == LogicalNodeType.MAP and x.schedulable(), logical_nodes))
         for map_node in map_nodes:
             if map_node.schedulable() and len(remaining_physical_nodes) > 0:
-                best_physical_node = MRScheduler.find_best_physical_node(map_node, remaining_physical_nodes)
+                best_physical_node = MRFlowScheduler.find_best_physical_node(map_node, remaining_physical_nodes)
                 if best_physical_node is not None:
                     scheduled_pairs.append((map_node, best_physical_node))
                     remaining_physical_nodes.remove(best_physical_node)
@@ -57,8 +57,8 @@ class MRFlowScheduler:
         # Scheduling reduce nodes
         reduce_nodes = list(filter(lambda x: x.type == LogicalNodeType.REDUCE and x.schedulable(), logical_nodes))
         for reduce_node in reduce_nodes:
-            if reduce_node.schedulable() and len(remaining_physical_nodes) > 0 and m_running_nodes < MRScheduler.MAX_REDUCE_NODES:
-                best_physical_node = MRScheduler.find_best_physical_node(reduce_node, remaining_physical_nodes)
+            if reduce_node.schedulable() and len(remaining_physical_nodes) > 0 and m_running_nodes < MRFlowScheduler.MAX_REDUCE_NODES:
+                best_physical_node = MRFlowScheduler.find_best_physical_node(reduce_node, remaining_physical_nodes)
                 if best_physical_node is not None:
                     scheduled_pairs.append((reduce_node, best_physical_node))
                     remaining_physical_nodes.remove(best_physical_node)
@@ -71,7 +71,7 @@ class MRFlowScheduler:
         other_nodes = list(filter(lambda x: x.type == LogicalNodeType.OTHER and x.schedulable(), logical_nodes))
         for other_node in other_nodes:
             if other_node.schedulable():
-                best_physical_node = MRScheduler.find_best_physical_node(other_node, remaining_physical_nodes)
+                best_physical_node = MRFlowScheduler.find_best_physical_node(other_node, remaining_physical_nodes)
                 if best_physical_node is not None:
                     scheduled_pairs.append((other_node, best_physical_node))
                     remaining_physical_nodes.remove(best_physical_node)
@@ -91,7 +91,7 @@ class MRFlowScheduler:
 
         # for each physical node find the best score
         for physical_node in remaining_physical_nodes:
-            score = MRScheduler.__score_physical_node(logical_node, physical_node)
+            score = MRFlowScheduler.__score_physical_node(logical_node, physical_node)
             if score > best_score:
                 best_physical_node = physical_node
                 best_score = score
