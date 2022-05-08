@@ -1,3 +1,4 @@
+# from functools import cached_property
 import networkx as nx
 import matplotlib.pyplot as plt
 
