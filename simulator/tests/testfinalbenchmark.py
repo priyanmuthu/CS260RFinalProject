@@ -54,7 +54,7 @@ class TestFinalBenchmarks(unittest.TestCase):
 
         map_nodes = FinalHelperFunctions.create_map_nodes(num_map_nodes, map_input_sizes)
 
-        # Add pnoed for map_nodes input
+        # Add pnode for map_nodes input
         map_split = TestFinalBenchmarks.split(map_nodes, num_physical_nodes)
         for sp, pn in zip(map_split, physical_nodes):
             for m in sp:
@@ -63,45 +63,27 @@ class TestFinalBenchmarks(unittest.TestCase):
         for mnode in map_nodes:
             mnode.output_length = map_output_size
             mnode.comp_length = map_compute_length
-        
-        num_shuffle_nodes = 1800
 
-        def shuffle_comp_length(input_size):
-            return (input_size*compute_power)
-
-        def shuffle_out_length(input_size):
-            return input_size
-        
-        shuffle_nodes = FinalHelperFunctions.create_shuffle_nodes(num_shuffle_nodes, shuffle_out_length)
-        split_map_nodes = TestFinalBenchmarks.split(map_nodes, num_shuffle_nodes)
-        for shuffle_node, split in zip(shuffle_nodes, split_map_nodes):
-            shuffle_node.comp_length = shuffle_comp_length
-            # connect the map nodes to the shuffle nodes
-            for map_node in split:
-                map_node.out_neighbors.append(shuffle_node)
-                shuffle_node.in_neighbors.append(map_node)
-
-        num_reduce_nodes = num_shuffle_nodes
+        num_reduce_nodes = 1800
 
         def reduce_comp_length(input_size):
-            return ((input_size/num_shuffle_nodes)*compute_power)
+            return ((input_size/num_reduce_nodes)*compute_power)
 
         def reduce_out_length(input_size):
-            return input_size/num_shuffle_nodes
+            return input_size/num_reduce_nodes
 
         reduce_nodes = FinalHelperFunctions.create_reduce_nodes(num_reduce_nodes)
 
-        # connect reduce nodes all shuffle nodes
+        # connect reduce nodes all map nodes
         for reduce_node in reduce_nodes:
             reduce_node.comp_length = reduce_comp_length
             reduce_node.output_length = reduce_out_length
-            for shuffle_node in shuffle_nodes:
-                shuffle_node.out_neighbors.append(reduce_node)
-                reduce_node.in_neighbors.append(shuffle_node)
+            for m_node in map_nodes:
+                m_node.out_neighbors.append(reduce_node)
+                reduce_node.in_neighbors.append(m_node)
 
         logical_nodes = []
         logical_nodes.extend(map_nodes)
-        logical_nodes.extend(shuffle_nodes)
         logical_nodes.extend(reduce_nodes)
 
         bandwidth = defaultdict(lambda: random.uniform(100, 150))
@@ -109,7 +91,7 @@ class TestFinalBenchmarks(unittest.TestCase):
 
         cluster = Cluster(physical_nodes, bandwidth, latency)
 
-        total_time = simulate(logical_nodes, physical_nodes, MRFlowScheduler, cluster, True)
+        total_time = simulate(logical_nodes, physical_nodes, MRScheduler, cluster, True)
 
         print("Total time: ",total_time)
 
