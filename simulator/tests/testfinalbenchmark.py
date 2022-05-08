@@ -5,6 +5,7 @@ from simulator.simulator import simulate
 from simulator.mrscheduler import MRScheduler
 from collections import defaultdict
 import random
+from simulator.mcmf import buildGraph, mcmf
 
 class TestFinalBenchmarks(unittest.TestCase):
     '''
@@ -110,3 +111,14 @@ class TestFinalBenchmarks(unittest.TestCase):
         total_time = simulate(logical_nodes, physical_nodes, MRScheduler, cluster, True)
 
         print("Total time: ",total_time)
+
+    def test_mcmf(self):
+        latencies = [[0, 1, 2], [1, 0, 1], [2, 1, 0]]
+        bandwidths = [[0, 1, 2], [1, 0, 1], [2, 1, 0]]
+        nodes = [{"id": 0}, {"id": 1}, {"id": 2}]
+        tasks = [{"id": 'task_0', "input nodes": [1, 2], "input sizes": [10, 10]},
+                    {"id": 'task_1', "input nodes": [1], "input sizes": [10]},
+                    {"id": 'task_2', "input nodes": [1], "input sizes": [50]}]
+
+        G = buildGraph(bandwidths, latencies, tasks, nodes)
+        print(mcmf(G, tasks))
