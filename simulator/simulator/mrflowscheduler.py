@@ -1,4 +1,4 @@
-from simulator.nodes import LogicalNode, PhysicalNode, LogicalNodeState, LogicalNodeType
+from simulator.nodes import LogicalNode, PhysicalNode, LogicalNodeState, LogicalNodeType, Cluster
 
 class MRFlowScheduler:
 
@@ -6,7 +6,7 @@ class MRFlowScheduler:
     MAX_REDUCE_NODES = 100000
 
     @staticmethod
-    def schedule(logical_nodes: list[LogicalNode], physical_nodes: list[PhysicalNode], completed_nodes: list[LogicalNode] = [], failed_nodes: list[LogicalNode] = []):
+    def schedule(logical_nodes: list[LogicalNode], physical_nodes: list[PhysicalNode], completed_nodes: list[LogicalNode] = [], failed_nodes: list[LogicalNode] = [], Cluster = None):
         '''
             Function to schedule the logical nodes to physical nodes
             logical_nodes: list of logical nodes to schedule
@@ -41,28 +41,14 @@ class MRFlowScheduler:
 
         if len(remaining_physical_nodes) == 0:
             return scheduled_pairs
-        
-        # Scheduling map nodes
-        map_nodes = list(filter(lambda x: x.type == LogicalNodeType.MAP and x.schedulable(), logical_nodes))
-        for map_node in map_nodes:
-            if map_node.schedulable() and len(remaining_physical_nodes) > 0:
-                best_physical_node = MRFlowScheduler.find_best_physical_node(map_node, remaining_physical_nodes)
-                if best_physical_node is not None:
-                    scheduled_pairs.append((map_node, best_physical_node))
-                    remaining_physical_nodes.remove(best_physical_node)
 
-        if len(remaining_physical_nodes) == 0:
-            return scheduled_pairs
+        # Schedule map and reduce nodes using MCMF
+        schedulable_nodes = list(filter(lambda x: (x.type == LogicalNodeType.MAP or x.type == LogicalNodeType.REDUCE or x.type == LogicalNodeType.OTHER) and x.schedulable(), logical_nodes))
+
+        # Run MCMF
         
-        # Scheduling reduce nodes
-        reduce_nodes = list(filter(lambda x: x.type == LogicalNodeType.REDUCE and x.schedulable(), logical_nodes))
-        for reduce_node in reduce_nodes:
-            if reduce_node.schedulable() and len(remaining_physical_nodes) > 0 and m_running_nodes < MRFlowScheduler.MAX_REDUCE_NODES:
-                best_physical_node = MRFlowScheduler.find_best_physical_node(reduce_node, remaining_physical_nodes)
-                if best_physical_node is not None:
-                    scheduled_pairs.append((reduce_node, best_physical_node))
-                    remaining_physical_nodes.remove(best_physical_node)
-                    r_running_nodes += 1
+
+        
 
         if len(remaining_physical_nodes) == 0:
             return scheduled_pairs

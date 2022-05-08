@@ -11,13 +11,20 @@ class Cluster:
         self.latency = latency
 
     def get_bandwidth(self, pnode1, pnode2):
+        if pnode1 == pnode2:
+            return float("inf")
         if (pnode1, pnode2) in self.bandwidth:
             return self.bandwidth[(pnode1, pnode2)]
         else:
             return self.bandwidth[(pnode2, pnode1)]
     
     def get_latency(self, pnode1, pnode2):
-        return self.latency[(pnode1, pnode2)]
+        if pnode1 == pnode2:
+            return 0
+        if (pnode1, pnode2) in self.bandwidth:
+            return self.bandwidth[(pnode1, pnode2)]
+        else:
+            return self.bandwidth[(pnode2, pnode1)]
 
     @staticmethod
     def default_cluster():
