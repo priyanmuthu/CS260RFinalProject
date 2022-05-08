@@ -1,9 +1,13 @@
+from functools import cached_property
 import networkx as nx
 import matplotlib.pyplot as plt
+from math import inf
 
-def buildGraph(latencies, tasks, nodes):
-    """Builds a graph from a nxn matrix of node latencies and a dictionary of task ids to 
-    (compute, input node list) tuples"""
+
+def buildGraph(bandwidths, latencies, tasks, nodes):
+    """Builds a graph from a nxn matrix of node latencies/bandwidths; a list of 
+    dictionaries of nodes with `id` and (maybe) `cpu`; and a list of 
+    dictionaries of tasks with `id`, `cpu`, `input nodes` list and `input sizes` list."""
 
     G = nx.DiGraph()
     # add source node 's' and sink node 't'
@@ -11,47 +15,48 @@ def buildGraph(latencies, tasks, nodes):
                       ("t", {"type": "sink"}),])
 
     # add physical nodes
-    for i in range(len(latencies[0])): 
-        G.add_node("n" + str(i), type = "node")
-
-    # add physical nodes and connect to sink
-    for key in nodes:
-        compute = nodes[key]
-        name = "n" + str(key)
-        G.add_node(name, type = "node")
-        G.add_edge(name, "t", capacity = compute, weight = 0)
-
+    node_list = []
+    for node in nodes:
+        cpu = node["cpu"]
+        node_list.append(node["id"])
+        name = "n" + str(node["id"])
+        G.add_node(name, type = "node", capacity = cpu)
+        G.add_edge(name, "t", capacity = cpu, weight = 0) # connect to sink
     
     # add task nodes and connect to physical nodes
-    for key in tasks: 
-        compute = tasks[key][0]
-        input_nodes = tasks[key][1]
-        name = "t" + str(key)
-        G.add_node("t" + str(key), type = "task")
+    for task in tasks: 
+        cpu = task["cpu"]
+        name = "t" + str(task["id"])
+        input_nodes = task["input nodes"]
+        input_sizes = task["input sizes"]
+        assert(len(input_nodes) == len(input_sizes))   
 
-        # connect source to task 
-        G.add_edge("s", name, capacity = compute, weight = 0)
+        G.add_node(name, type = "task", capacity = cpu)
 
-        for i in range(len(nodes)):
+        G.add_edge("s", name, capacity = cpu, weight = 0) # connect to source
+
+        for node in node_list: 
+            node_name = "n" + str(node)
+            # if assignment not possible, don't add edge
+            if G.nodes[node_name]["capacity"] < cpu:
+                continue
             cost = 0
-            for node in input_nodes:
-                cost += latencies[i][node]
-            G.add_edge(name, "n" + str(i), capacity = compute, weight = cost)
+            for i in range(len(input_nodes)):
+                input_node = input_nodes[i]
+                if input_node != node:
+                    # for any two nodes, take max(latency, size / bandwidth) as the cost
+                    cost += max(input_sizes[i] / bandwidths[node][input_node], latencies[node][input_node])
+            G.add_edge(name, node_name, capacity = cpu, weight = cost)
     return G
 
 def mcmf(G):
-    minCostFlow = nx.max_flow_min_cost(G, "s", "t")
+    minCostFlow = nx.max_flow_min_cost(G, "s", "t") 
     return minCostFlow, nx.cost_of_flow(G, minCostFlow)
 
-
-
-
-# def test_graph_build(num_nodes, num_tasks, )
-
+# an example
 latencies = [[0, 1, 2], [1, 0, 1], [2, 1, 0]]
-tasks = {0: (1, [1, 2]), 1: (2, [1]), 2: (1, [0, 2])}
-nodes = {0: 2, 1: 2, 2: 1}
-G = buildGraph(latencies, tasks, nodes)
+bandwidths = [[0, 1, 2], [1, 0, 1], [2, 1, 0]]
+nodes = [{"id": 0, "cpu": 4}, {"id": 1, "cpu": 4}, {"id": 2, "cpu": 2}]
+tasks = [{"id": 0, "cpu": 1, "input nodes": [1, 2], "input sizes" : [10, 10]}, {"id": 1, "cpu": 1, "input nodes": [1], "input sizes" : [10]}, {"id": 2, "cpu": 1, "input nodes": [1], "input sizes" : [50]}]
+G = buildGraph(bandwidths, latencies, tasks, nodes)
 print(mcmf(G))
-
-# Expected Output
