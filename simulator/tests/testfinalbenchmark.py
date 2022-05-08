@@ -110,12 +110,13 @@ class TestFinalBenchmarks(unittest.TestCase):
 
         cluster = Cluster(physical_nodes, bandwidth, latency)
 
-        total_time = simulate(logical_nodes, physical_nodes, MRFlowScheduler, cluster, True)
+        total_time = simulate(logical_nodes, physical_nodes, MRScheduler, cluster, True)
 
         print("Total time: ",total_time)
 
     def test_map_reduce_sort_modest(self):
-        num_physical_nodes = 100
+        num_barebones = 100
+        num_physical_nodes = num_barebones*4
         compute_power = (1/2)
         memory = 4000
         bandwidth = 1000/10
@@ -130,7 +131,7 @@ class TestFinalBenchmarks(unittest.TestCase):
             [memory]*num_physical_nodes, 
             [bandwidth]*num_physical_nodes)
 
-        num_map_nodes = 800
+        num_map_nodes = num_barebones*8
         map_input_size = 640
         variation = 4
         map_assign_time = 1
@@ -156,7 +157,7 @@ class TestFinalBenchmarks(unittest.TestCase):
             mnode.output_length = map_output_size
             mnode.comp_length = map_compute_length
         
-        num_shuffle_nodes = 100
+        num_shuffle_nodes = num_barebones
 
         def shuffle_comp_length(input_size):
             return (input_size*compute_power)
@@ -173,7 +174,7 @@ class TestFinalBenchmarks(unittest.TestCase):
                 map_node.out_neighbors.append(shuffle_node)
                 shuffle_node.in_neighbors.append(map_node)
 
-        num_reduce_nodes = num_shuffle_nodes
+        num_reduce_nodes = num_barebones
 
         def reduce_comp_length(input_size):
             return ((input_size/num_shuffle_nodes)*compute_power)
@@ -196,8 +197,8 @@ class TestFinalBenchmarks(unittest.TestCase):
         logical_nodes.extend(shuffle_nodes)
         logical_nodes.extend(reduce_nodes)
 
-        bandwidth = defaultdict(lambda: random.uniform(100, 150))
-        latency = defaultdict(lambda: random.uniform(1, 2))
+        bandwidth = defaultdict(lambda: random.uniform(10, 15))
+        latency = defaultdict(lambda: random.uniform(0.1, 0.2))
 
         cluster = Cluster(physical_nodes, bandwidth, latency)
 

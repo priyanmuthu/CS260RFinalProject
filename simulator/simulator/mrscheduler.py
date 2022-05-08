@@ -1,12 +1,9 @@
-from simulator.nodes import LogicalNode, PhysicalNode, LogicalNodeState, LogicalNodeType
+from simulator.nodes import LogicalNode, PhysicalNode, LogicalNodeState, LogicalNodeType, Config
 
 class MRScheduler:
 
-    MAX_SHUFFLE_NODES = 100000
-    MAX_REDUCE_NODES = 100000
-
     @staticmethod
-    def schedule(logical_nodes: list[LogicalNode], physical_nodes: list[PhysicalNode], completed_nodes: list[LogicalNode] = [], failed_nodes: list[LogicalNode] = []):
+    def schedule(logical_nodes: list[LogicalNode], physical_nodes: list[PhysicalNode], completed_nodes: list[LogicalNode] = [], failed_nodes: list[LogicalNode] = [], cluster = None):
         '''
             Function to schedule the logical nodes to physical nodes
             logical_nodes: list of logical nodes to schedule
@@ -32,7 +29,7 @@ class MRScheduler:
         # Scheduling shuffle node
         shuffle_nodes = filter(lambda x: x.type == LogicalNodeType.SHUFFLE and x.schedulable(), logical_nodes)
         for shuffle_node in shuffle_nodes:
-            if shuffle_node.schedulable() and len(remaining_physical_nodes) > 0 and s_running_nodes < MRScheduler.MAX_SHUFFLE_NODES:
+            if shuffle_node.schedulable() and len(remaining_physical_nodes) > 0 and s_running_nodes < Config.MAX_SHUFFLE_NODES:
                 best_physical_node = MRScheduler.find_best_physical_node(shuffle_node, remaining_physical_nodes)
                 if best_physical_node is not None:
                     scheduled_pairs.append((shuffle_node, best_physical_node))
@@ -57,7 +54,7 @@ class MRScheduler:
         # Scheduling reduce nodes
         reduce_nodes = list(filter(lambda x: x.type == LogicalNodeType.REDUCE and x.schedulable(), logical_nodes))
         for reduce_node in reduce_nodes:
-            if reduce_node.schedulable() and len(remaining_physical_nodes) > 0 and m_running_nodes < MRScheduler.MAX_REDUCE_NODES:
+            if reduce_node.schedulable() and len(remaining_physical_nodes) > 0 and m_running_nodes < Config.MAX_REDUCE_NODES:
                 best_physical_node = MRScheduler.find_best_physical_node(reduce_node, remaining_physical_nodes)
                 if best_physical_node is not None:
                     scheduled_pairs.append((reduce_node, best_physical_node))

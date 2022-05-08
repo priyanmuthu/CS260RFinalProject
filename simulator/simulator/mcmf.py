@@ -11,6 +11,7 @@ def buildGraph(cluster, lnodes, pnodes):
     G.add_nodes_from([("s", {"type": "source"}),
                         ("t", {"type": "sink"}), ])
     # add physical nodes
+    pnode_dict = {pnode.id: pnode for pnode in pnodes}
     for pnode in pnodes: 
         G.add_node(pnode.id, type = "pnode")
         G.add_edge(pnode.id, "t", capacity = 1, weight = 0)
@@ -18,7 +19,7 @@ def buildGraph(cluster, lnodes, pnodes):
     # add task nodes and connect to physical nodes
     for lnode in lnodes: 
         G.add_node(lnode.id, type = "lnode")
-        G.add_edge("s", lnode, capacity = 1, weight = 0)
+        G.add_edge("s", lnode.id, capacity = 1, weight = 0)
 
         for pnode in pnodes: 
             cost = 0
@@ -28,8 +29,9 @@ def buildGraph(cluster, lnodes, pnodes):
                 latency = cluster.get_latency(pnode, source)
                 cost += max(latency, inp.size / bandwidth)
             
-            G.add_edge(lnode.id, pnode.id, capacity = 1, weight = cost)
+            G.add_edge(lnode.id, pnode.id, capacity = 1, weight = int(cost))
     
+
     minCostFlow = nx.max_flow_min_cost(G, "s", "t")
 
     assignment = {}
@@ -37,7 +39,7 @@ def buildGraph(cluster, lnodes, pnodes):
         flow_edges = minCostFlow[lnode.id]
         for key in flow_edges:
             if flow_edges[key] > 0:
-                assignment[lnode] = key
+                assignment[lnode] = pnode_dict[key]
                 break
 
     return assignment

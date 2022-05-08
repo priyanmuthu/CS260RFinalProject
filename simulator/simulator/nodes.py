@@ -44,6 +44,8 @@ class Config:
     OUTPUT_LENGTH_MULTIPLIER = 1
     FAILURE_PROBABILITY = 0.001
     STRAGGLER_PROBABILITY = 0.001
+    MAX_SHUFFLE_NODES = 100000
+    MAX_REDUCE_NODES = 100000
 
     @staticmethod
     def reset():
@@ -56,6 +58,8 @@ class Config:
         Config.OUTPUT_LENGTH_MULTIPLIER = 1
         Config.FAILURE_PROBABILITY = 0.001
         Config.STRAGGLER_PROBABILITY = 0.001
+        MAX_SHUFFLE_NODES = 100000
+        MAX_REDUCE_NODES = 100000
 
 # Return the bandwidth multiplier from physical node1 to node2
 # For now, assume uniform bandwidth
