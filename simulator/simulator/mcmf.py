@@ -1,8 +1,7 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 
-
-def buildGraph(bandwidths, latencies, tasks, nodes):
+def buildGraph(cluster, lnodes, pnodes):
     """Builds a graph from a nxn matrix of node latencies/bandwidths; a list of 
     dictionaries of nodes with `id` and (maybe) `cpu`; and a list of 
     dictionaries of tasks with `id`, `input nodes` list and `input sizes` list."""
@@ -12,51 +11,60 @@ def buildGraph(bandwidths, latencies, tasks, nodes):
     G.add_nodes_from([("s", {"type": "source"}),
                         ("t", {"type": "sink"}), ])
     # add physical nodes
-    node_list = []
-    for node in nodes:
-        node_list.append(node["id"])
-        name = "n" + str(node["id"])
-        G.add_node(name, type="node")
-        G.add_edge(name, "t", capacity=1, weight=0)  # connect to sink
+    for pnode in pnodes: 
+        G.add_node(pnode.id, type = "pnode")
+        G.add_edge(pnode.id, "t", capacity = 1, weight = 0)
 
     # add task nodes and connect to physical nodes
-    for task in tasks:
-        name = "t" + str(task["id"])
-        input_nodes = task["input nodes"]
-        input_sizes = task["input sizes"]
-        assert(len(input_nodes) == len(input_sizes))
-        G.add_node(name, type="task")
-        G.add_edge("s", name, capacity=1, weight=0)  # connect to source
+    for lnode in lnodes: 
+        G.add_node(lnode.id, type = "lnode")
+        G.add_edge("s", lnode, capacity = 1, weight = 0)
 
-        for node in node_list:
-            node_name = "n" + str(node)
+        for pnode in pnodes: 
             cost = 0
-            for i in range(len(input_nodes)):
-                input_node = input_nodes[i]
-                if input_node != node:
-                    # for any two nodes, take max(latency, size / bandwidth) as the cost
-                    cost += max(input_sizes[i] / bandwidths[node]
-                                [input_node], latencies[node][input_node])
-            G.add_edge(name, node_name, capacity=1, weight=cost)
-    return G
-
-
-def mcmf(G, tasks):
+            for inp in lnode.input_q: 
+                source = inp.from_pnode 
+                bandwidth = cluster.get_bandwidth(pnode, source)
+                latency = cluster.get_latency(pnode, source)
+                cost += max(latency, inp.size / bandwidth)
+            
+            G.add_edge(lnode.id, pnode.id, capacity = 1, weight = cost)
+    
     minCostFlow = nx.max_flow_min_cost(G, "s", "t")
-    task_names = ["t" + str(task["id"]) for task in tasks]
 
     assignment = {}
-    assignment_ids = {}
-    for name in task_names:
-        flow_edges = minCostFlow[name]
-        assigned = False
+    for lnode in lnodes:
+        flow_edges = minCostFlow[lnode.id]
         for key in flow_edges:
             if flow_edges[key] > 0:
-                assignment[name] = key
-                assignment_ids[int(name[1])] = int(key[1])
-                assigned = True
-        if assigned is False:
-            print("NODE ", name, " not assigned physical node")
+                assignment[lnode] = key
+                break
 
-    # choose 1 to return based of simulator arch
-    return (assignment, assignment_ids)
+    return assignment
+
+
+#             # cost = 0
+#             # if pnode in lnode.in_neighbors: 
+#             #     cost = 
+#             # else: 
+#             #     cost = 
+            
+
+# def mcmf(G, tasks):
+#     minCostFlow = nx.max_flow_min_cost(G, "s", "t")
+
+#     assignment = {}
+#     assignment_ids = {}
+#     for name in task_names:
+#         flow_edges = minCostFlow[name]
+#         assigned = False
+#         for key in flow_edges:
+#             if flow_edges[key] > 0:
+#                 assignment[name] = key
+#                 assignment_ids[int(name[1])] = int(key[1])
+#                 assigned = True
+#         if assigned is False:
+#             print("NODE ", name, " not assigned physical node")
+
+#     # choose 1 to return based of simulator arch
+#     return (assignment, assignment_ids)
