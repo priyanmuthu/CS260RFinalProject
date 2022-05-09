@@ -114,8 +114,7 @@ class TestFinalBenchmarks(unittest.TestCase):
 
         print("Total time: ",total_time)
 
-    def test_map_reduce_sort_modest(self):
-        num_barebones = 100
+    def run_map_reduce_sort_modest(self, num_barebones, scheduler_class):
         num_physical_nodes = num_barebones*4
         compute_power = (1/2)
         memory = 4000
@@ -129,7 +128,7 @@ class TestFinalBenchmarks(unittest.TestCase):
         physical_nodes = FinalHelperFunctions.create_physical_nodes(num_physical_nodes, 
             [compute_power]*num_physical_nodes, 
             [memory]*num_physical_nodes, 
-            [bandwidth]*num_physical_nodes)
+            [bandwidth]*num_physical_nodes, num_barebones)
 
         num_map_nodes = num_barebones*8
         map_input_size = 640
@@ -202,9 +201,21 @@ class TestFinalBenchmarks(unittest.TestCase):
 
         cluster = Cluster(physical_nodes, bandwidth, latency)
 
-        total_time = simulate(logical_nodes, physical_nodes, MRFlowScheduler, cluster, True)
+        total_time = simulate(logical_nodes, physical_nodes, scheduler_class, cluster, True)
 
-        print("Total time: ",total_time)
+        # print("Total time: ",total_time)
+        return total_time
+
+    def test_map_reduce_sort_experiments(self):
+        barebones_list = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80]
+        res = []
+        for barebones in barebones_list:
+            total_mr_time = self.run_map_reduce_sort_modest(barebones, MRScheduler)
+            total_flow_time = self.run_map_reduce_sort_modest(barebones, MRFlowScheduler)
+            res.append((barebones, total_mr_time, total_flow_time))
+            # print(barebones, total_mr_time, total_flow_time)
+        print(res)
+
 
     def test_mcmf(self):
         latencies = [[0, 1, 2], [1, 0, 1], [2, 1, 0]]

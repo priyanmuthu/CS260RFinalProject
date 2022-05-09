@@ -2,6 +2,11 @@ from simulator.nodes import *
 
 class FinalHelperFunctions:
     @staticmethod
+    def split(a, n):
+        k, m = divmod(len(a), n)
+        return (a[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(n))
+    
+    @staticmethod
     def create_map_reduce_graph(num_map_nodes, input_map_sizes, num_reduce_nodes):
         '''
             Function to create map-reduce graph
@@ -81,7 +86,7 @@ class FinalHelperFunctions:
         return shuffle_nodes
     
     @staticmethod
-    def create_physical_nodes(num_physical_nodes, compute_power_array, memory_array, bandwidth_array):
+    def create_physical_nodes(num_physical_nodes, compute_power_array, memory_array, bandwidth_array, num_barebones):
         '''
             Function to create physical node
             num_physical_nodes: number of physical nodes to create
@@ -97,4 +102,10 @@ class FinalHelperFunctions:
         for i in range(num_physical_nodes):
             physical_node = PhysicalNode(compute_power=compute_power_array[i], memory=memory_array[i])
             physical_nodes.append(physical_node)
+        
+        split_pnodes = FinalHelperFunctions.split(physical_nodes, num_barebones)
+        for i, sp in enumerate(split_pnodes):
+            for pnode in sp:
+                pnode.machine_id = i
+        
         return physical_nodes

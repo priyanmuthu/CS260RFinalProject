@@ -11,20 +11,20 @@ class Cluster:
         self.latency = latency
 
     def get_bandwidth(self, pnode1, pnode2):
-        if pnode1 == pnode2:
+        if pnode1.machine_id == pnode2.machine_id:
             return float("inf")
-        if (pnode1, pnode2) in self.bandwidth:
-            return self.bandwidth[(pnode1, pnode2)]
+        if (pnode1.machine_id, pnode2.machine_id) in self.bandwidth:
+            return self.bandwidth[(pnode1.machine_id, pnode2.machine_id)]
         else:
-            return self.bandwidth[(pnode2, pnode1)]
+            return self.bandwidth[(pnode2.machine_id, pnode1.machine_id)]
     
     def get_latency(self, pnode1, pnode2):
-        if pnode1 == pnode2:
+        if pnode1.machine_id == pnode2.machine_id:
             return 0
-        if (pnode1, pnode2) in self.bandwidth:
-            return self.bandwidth[(pnode1, pnode2)]
+        if (pnode1.machine_id, pnode2.machine_id) in self.bandwidth:
+            return self.bandwidth[(pnode1.machine_id, pnode2.machine_id)]
         else:
-            return self.bandwidth[(pnode2, pnode1)]
+            return self.bandwidth[(pnode2.machine_id, pnode1.machine_id)]
 
     @staticmethod
     def default_cluster():
@@ -225,6 +225,7 @@ class PhysicalNode:
         self.memory = memory
         self.lnode = lnode
         self.failed = failed
+        self.machine_id = -1
 
     # Can this physical node be scheduled?
     def schedulable(self):
